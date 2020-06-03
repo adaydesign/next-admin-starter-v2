@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Router from 'next/router';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -17,11 +17,18 @@ import LoginForm from '../../components/login/LoginForm';
 import { Copyright } from '../../components/layouts/Footer';
 import Alert from '../../components/shared/Alert';
 import Link from 'next/link';
+import BlockUi from 'react-block-ui';
 
 const LoginPage = () => {
     const classes = useStyles();
+    const [showBlockUI, setShowBlockUI] = useState(false)
 
+    const beginSubmitHandle = (show) => {
+        setShowBlockUI(show)
+    }
+    
     const responseHandle = (success, data) => {
+        setShowBlockUI(false)
         Alert({
             title: success ? 'Login Success' : 'Login Fail!',
             icon: success ? 'success' : 'error',
@@ -29,7 +36,7 @@ const LoginPage = () => {
             onClose: () => {
                 if (success) {
                     // redirect
-                    const { pathname } = Router
+                    //const { pathname } = Router
                     //if(pathname == '/' ){
                     Router.push('/dashboard')
                     //}
@@ -39,29 +46,31 @@ const LoginPage = () => {
     }
 
     return (
-        <Grid container component="main" className={classes.root}>
-            <CssBaseline />
-            <Grid item xs={false} sm={4} md={8} className={classes.image} />
-            <Grid item xs={12} sm={8} md={4} component={Paper} elevation={6} square>
-                <div className={classes.paper}>
-                    <Avatar className={classes.avatar}>
-                        <LockOutlinedIcon />
-                    </Avatar>
-                    <Typography component="h1" variant="h5">
-                        ลงชื่อเข้าสู่ระบบ
+        <BlockUi tag="div" blocking={showBlockUI}>
+            <Grid container component="main" className={classes.root}>
+                <CssBaseline />
+                <Grid item xs={false} sm={4} md={8} className={classes.image} />
+                <Grid item xs={12} sm={8} md={4} component={Paper} elevation={6} square>
+                    <div className={classes.paper}>
+                        <Avatar className={classes.avatar}>
+                            <LockOutlinedIcon />
+                        </Avatar>
+                        <Typography component="h1" variant="h5">
+                            ลงชื่อเข้าสู่ระบบ
                     </Typography>
-                    <LoginForm onResponses={responseHandle} />
-                    <Box mt={1}>
-                        <Link href="/">
-                            <Button color="secondary">กลับหน้าหลัก</Button>
-                        </Link>
-                    </Box>
-                    <Box mt={4}>
-                        <Copyright />
-                    </Box>
-                </div>
+                        <LoginForm onResponses={responseHandle} onBeginSubmit={beginSubmitHandle} />
+                        <Box mt={1}>
+                            <Link href="/">
+                                <Button color="secondary">กลับหน้าหลัก</Button>
+                            </Link>
+                        </Box>
+                        <Box mt={4}>
+                            <Copyright />
+                        </Box>
+                    </div>
+                </Grid>
             </Grid>
-        </Grid>
+        </BlockUi>
     );
 }
 

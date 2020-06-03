@@ -2,26 +2,28 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Router from 'next/router'
 import Select from "react-select";
-// import { Formik } from "formik";
+import { connect } from 'react-redux';
 import { useForm, Controller } from "react-hook-form";
 
 import { Button, TextField, Divider, Grid, Typography }
     from '@material-ui/core';
 
-    import useStyles from '../../components/login/style';
+import useStyles from '../../components/login/style';
 import { createNewUser } from '../../includes/requests/users'
 import { getAllOffices } from '../../includes/requests/offices'
 import { getAllRoles } from '../../includes/requests/roles'
 import { getAllOfficerTypes } from '../../includes/requests/officertypes'
 // import { getDateYMDFormat } from '../../includes/lib/date-utils'
 
-const AddUserForm = (props) => {
-    const { onResponses } = props
+import BlockUi from 'react-block-ui';
 
+const AddUserForm = (props) => {
+    const { userData, onResponses } = props
     const classes = useStyles()
 
     const initValues = {
         username: "",
+        password:"",
         title: "",
         firstName: "",
         lastName: "",
@@ -29,11 +31,12 @@ const AddUserForm = (props) => {
         position: "",
         officeID: 0,
         officerTypeID: 0,
-        roles: [{id:0}],
+        roles: [{ id: 0 }],
         status: "A"
     }
     const { register, handleSubmit, control, errors, reset } = useForm()
 
+    const [showBlockUI, setShowBlockUI] = useState(true)
     // option
     var [officesOptions, setOfficesOptions] = useState([])
     var [rolesOptions, setRolesOptions] = useState([])
@@ -43,8 +46,8 @@ const AddUserForm = (props) => {
 
     const loadOfficesData = async () => {
         const result = await getAllOffices()
-        console.log('load office')
-        console.log(result.data.data.offices)
+        // console.log('load office')
+        // console.log(result.data.data.offices)
         if (result.data.data.offices != undefined) {
             const options = result.data.data.offices.map(o => {
                 return {
@@ -52,7 +55,8 @@ const AddUserForm = (props) => {
                     label: o.name
                 }
             })
-            console.log(options)
+            // console.log(options)
+            console.log('1. load office')
             setOfficesOptions(options)
         }
     }
@@ -67,7 +71,8 @@ const AddUserForm = (props) => {
                     label: o.name
                 }
             })
-            console.log(options)
+            // console.log(options)
+            console.log('2. load role type')
             setRolesOptions(options)
         }
     }
@@ -83,14 +88,23 @@ const AddUserForm = (props) => {
                 }
             })
             // console.log(options)
+            console.log('3. load officer type')
             settypeOfficerOptions(options)
+
+            
         }
     }
 
+    const allLoadData = async () => {
+        await loadOfficesData()
+        await loadRoleData()
+        await loadOfficerTypeData()
+        console.log('4. off block ui')
+        setShowBlockUI(false)
+    }
+
     useEffect(() => {
-        loadOfficesData()
-        loadRoleData()
-        loadOfficerTypeData()
+        allLoadData()
     }, [])
 
     const onSubmitHandle = async (formData) => {
@@ -105,19 +119,20 @@ const AddUserForm = (props) => {
             officeID: formData.office.value,
             officerTypeID: formData.typeOfficer.value,
             roles: roles,
-            status: formData.status.value
+            status: formData.status.value,
+            createdUID: userData.id
         }
 
-        console.log('submit - send data')
-        console.log(sendData)
+        // console.log('submit - send data')
+        // console.log(sendData)
         // sendData.start_date = new Date(formData.start_date).toJSON()
         // sendData.end_date = new Date(formData.end_date).toJSON()
 
-        const token = localStorage.getItem('token')
+        const token = userData.token // localStorage.getItem('token')
         if (token) {
             try {
                 const result = await createNewUser(token, sendData)
-                console.log(result)
+                // console.log(result)
                 onResponses(true, { message: `เพิ่มข้อมูลแล้ว` })
             } catch (err) {
                 console.log(err)
@@ -138,196 +153,209 @@ const AddUserForm = (props) => {
 
     return (
         <>
-            <form onSubmit={handleSubmit(onSubmitHandle)} className={classes.form} >
-                <Grid container direction="row" alignItems="flex-end" spacing={2}>
-                    <Grid item md={2} >
-                        <Typography>รหัสบัญชี</Typography>
-                    </Grid>
-                    <Grid item md={3} >
-                        <Controller as={TextField}
-                            control={control}
-                            margin="normal"
-                            size="small"
-                            required
-                            fullWidth
-                            label="ชื่อบัญชี"
-                            name="username"
-                            defaultValue={initValues.username}
-                        />
-                    </Grid>
-                </Grid>
-                <Grid container direction="row" alignItems="flex-end" spacing={2}>
-                    <Grid item md={2} >
-                        <Typography>ชื่อ-นามสกุล</Typography>
-                    </Grid>
-                    <Grid item md={2} >
-                        <Controller as={TextField}
-                            control={control}
-                            margin="normal"
-                            size="small"
-                            fullWidth
-                            label="คำนำหน้า"
-                            name="title"
-                            defaultValue={initValues.title}
-                        />
-                    </Grid>
-                    <Grid item md={4} >
-                        <Controller as={TextField}
-                            control={control}
-                            margin="normal"
-                            size="small"
-                            required
-                            fullWidth
-                            label="ชื่อ"
-                            name="firstName"
-                            defaultValue={initValues.firstName}
-                        />
-                    </Grid>
-                    <Grid item md={4} >
-                        <Controller as={TextField}
-                            control={control}
-                            margin="normal"
-                            size="small"
-                            required
-                            fullWidth
-                            label="นามสกุล"
-                            name="lastName"
-                            defaultValue={initValues.lastName}
-                        />
-                    </Grid>
-                </Grid>
-                <Grid container direction="row" alignItems="flex-end" spacing={2} style={{ marginTop: '-20px' }}>
-                    <Grid item md={2} >
-                        <Typography>อีเมล</Typography>
-                    </Grid>
-                    <Grid item md={8} >
-                        <Controller as={TextField}
-                            control={control}
-                            margin="normal"
-                            size="small"
-                            fullWidth
-                            label="อีเมล"
-                            name="email"
-                            defaultValue={initValues.email}
-                        />
-                    </Grid>
-                </Grid>
-                <Grid container direction="row" alignItems="center" spacing={2}>
-                    <Grid item md={2} >
-                        <Typography>ประเภทตำแหน่งงาน</Typography>
-                    </Grid>
-                    <Grid item md={5} >
-                        <Controller as={Select}
-                            name="typeOfficer"
-                            control={control}
-                            options={typeOfficerOptions}
-                            onChange={([selected]) => {
-                                return selected
-                            }}
-                            placeholder = "เลือกประเภทตำแหน่ง"
-                        />
-                    </Grid>
-                </Grid>
-                <Grid container direction="row" alignItems="flex-end" spacing={2} style={{ marginTop: '-20px' }}>
-                    <Grid item md={2} >
-                        <Typography>ชื่อตำแหน่ง</Typography>
-                    </Grid>
-                    <Grid item md={8} >
-                        <Controller as={TextField}
-                            control={control}
-                            margin="normal"
-                            size="small"
-                            fullWidth
-                            label="ตำแหน่ง"
-                            name="position"
-                            defaultValue={initValues.position}
-                        />
-                    </Grid>
-                </Grid>
-                <Grid container direction="row" alignItems="center" spacing={2}>
-                    <Grid item md={2} >
-                        <Typography>หน่วยงาน</Typography>
-                    </Grid>
-                    <Grid item md={5} >
-                        <Controller as={Select}
-                            name="office"
-                            control={control}
-                            options={officesOptions}
-                            onChange={([selected]) => {
-                                return selected
-                            }}
-                            placeholder = "เลือกหน่วยงาน"
+            <BlockUi tag="div" blocking={showBlockUI} renderChildren={false}>
+                <form onSubmit={handleSubmit(onSubmitHandle)} className={classes.form} >
+                    <Grid container direction="row" alignItems="flex-end" spacing={2}>
+                        <Grid item md={2} >
+                            <Typography>บัญชีผู้ใช้และรหัสผ่าน</Typography>
+                        </Grid>
+                        <Grid item md={4} >
+                            <Controller as={TextField}
+                                control={control}
+                                margin="normal"
+                                size="small"
+                                required
+                                fullWidth
+                                label="ชื่อบัญชี"
+                                name="username"
+                                defaultValue={initValues.username}
                             />
+                        </Grid>
+                        <Grid item md={4} >
+                            <Controller as={TextField}
+                                control={control}
+                                margin="normal"
+                                size="small"
+                                required
+                                fullWidth
+                                label="รหัสผ่าน"
+                                name="password"
+                                type="password"
+                                defaultValue={initValues.password}
+                            />
+                        </Grid>
                     </Grid>
-                </Grid>
-                <Grid container direction="row" alignItems="center" spacing={2}>
-                    <Grid item md={2} >
-                        <Typography>สิทธิ์การใช้งาน</Typography>
+                    <Grid container direction="row" alignItems="flex-end" spacing={2}>
+                        <Grid item md={2} >
+                            <Typography>ชื่อ-นามสกุล</Typography>
+                        </Grid>
+                        <Grid item md={2} >
+                            <Controller as={TextField}
+                                control={control}
+                                margin="normal"
+                                size="small"
+                                fullWidth
+                                label="คำนำหน้า"
+                                name="title"
+                                defaultValue={initValues.title}
+                            />
+                        </Grid>
+                        <Grid item md={4} >
+                            <Controller as={TextField}
+                                control={control}
+                                margin="normal"
+                                size="small"
+                                required
+                                fullWidth
+                                label="ชื่อ"
+                                name="firstName"
+                                defaultValue={initValues.firstName}
+                            />
+                        </Grid>
+                        <Grid item md={4} >
+                            <Controller as={TextField}
+                                control={control}
+                                margin="normal"
+                                size="small"
+                                required
+                                fullWidth
+                                label="นามสกุล"
+                                name="lastName"
+                                defaultValue={initValues.lastName}
+                            />
+                        </Grid>
                     </Grid>
-                    <Grid item md={5} >
-                        <Controller as={Select}
-                            name="role"
-                            control={control}
-                            options={rolesOptions}
-                            onChange={([selected]) => {
-                                return selected
-                            }}
-                            placeholder = "เลือกสิทธิ์การใช้งาน"
-                        />
+                    <Grid container direction="row" alignItems="flex-end" spacing={2} style={{ marginTop: '-20px' }}>
+                        <Grid item md={2} >
+                            <Typography>อีเมล</Typography>
+                        </Grid>
+                        <Grid item md={8} >
+                            <Controller as={TextField}
+                                control={control}
+                                margin="normal"
+                                size="small"
+                                fullWidth
+                                label="อีเมล"
+                                name="email"
+                                defaultValue={initValues.email}
+                            />
+                        </Grid>
                     </Grid>
-                </Grid>
-                <Grid container direction="row" alignItems="center" spacing={2}>
-                    <Grid item md={2} >
-                        <Typography>สถานะของบัญชี</Typography>
+                    <Grid container direction="row" alignItems="center" spacing={2}>
+                        <Grid item md={2} >
+                            <Typography>ประเภทตำแหน่งงาน</Typography>
+                        </Grid>
+                        <Grid item md={5} >
+                            <Controller as={Select}
+                                name="typeOfficer"
+                                control={control}
+                                options={typeOfficerOptions}
+                                onChange={([selected]) => {
+                                    return selected
+                                }}
+                                placeholder="เลือกประเภทตำแหน่ง"
+                            />
+                        </Grid>
                     </Grid>
-                    <Grid item md={5} >
-                        <Controller as={Select}
-                            name="status"
-                            control={control}
-                            options={userStatusOptions}
-                            onChange={([selected]) => {
-                                return selected
-                            }}
-                            placeholder = "เลือกสถานะของบัญชี"
-                        />
+                    <Grid container direction="row" alignItems="flex-end" spacing={2} style={{ marginTop: '-20px' }}>
+                        <Grid item md={2} >
+                            <Typography>ชื่อตำแหน่ง</Typography>
+                        </Grid>
+                        <Grid item md={8} >
+                            <Controller as={TextField}
+                                control={control}
+                                margin="normal"
+                                size="small"
+                                fullWidth
+                                label="ตำแหน่ง"
+                                name="position"
+                                defaultValue={initValues.position}
+                            />
+                        </Grid>
                     </Grid>
-                </Grid>
+                    <Grid container direction="row" alignItems="center" spacing={2}>
+                        <Grid item md={2} >
+                            <Typography>หน่วยงาน</Typography>
+                        </Grid>
+                        <Grid item md={5} >
+                            <Controller as={Select}
+                                name="office"
+                                control={control}
+                                options={officesOptions}
+                                onChange={([selected]) => {
+                                    return selected
+                                }}
+                                placeholder="เลือกหน่วยงาน"
+                            />
+                        </Grid>
+                    </Grid>
+                    <Grid container direction="row" alignItems="center" spacing={2}>
+                        <Grid item md={2} >
+                            <Typography>สิทธิ์การใช้งาน</Typography>
+                        </Grid>
+                        <Grid item md={5} >
+                            <Controller as={Select}
+                                name="role"
+                                control={control}
+                                options={rolesOptions}
+                                onChange={([selected]) => {
+                                    return selected
+                                }}
+                                placeholder="เลือกสิทธิ์การใช้งาน"
+                            />
+                        </Grid>
+                    </Grid>
+                    <Grid container direction="row" alignItems="center" spacing={2}>
+                        <Grid item md={2} >
+                            <Typography>สถานะของบัญชี</Typography>
+                        </Grid>
+                        <Grid item md={5} >
+                            <Controller as={Select}
+                                name="status"
+                                control={control}
+                                options={userStatusOptions}
+                                onChange={([selected]) => {
+                                    return selected
+                                }}
+                                placeholder="เลือกสถานะของบัญชี"
+                            />
+                        </Grid>
+                    </Grid>
 
-                <Grid container spacing={2} justify="center" style={{ marginTop: '20px' }}>
-                    <Grid item md={2}>
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            color="secondary"
-                            className={classes.submit}
-                        >บันทึก</Button>
-                    </Grid>
-                    <Grid item md={2}>
-                        <Button
-                            fullWidth
-                            variant="contained"
-                            color="secondary"
-                            className={classes.submit}
-                            onClick={()=>{ console.log('reset'); reset()}}
-                        >รีเซ็ตฟอร์ม</Button>
-                    </Grid>
-                    <Grid item md={2}>
-                        <Link href="/users">
+                    <Grid container spacing={2} justify="center" style={{ marginTop: '20px' }}>
+                        <Grid item md={2}>
                             <Button
-                                type="button"
+                                type="submit"
                                 fullWidth
                                 variant="contained"
                                 color="secondary"
                                 className={classes.submit}
-                            >ยกเลิก</Button>
-                        </Link>
+                            >บันทึก</Button>
+                        </Grid>
+                        <Grid item md={2}>
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                color="secondary"
+                                className={classes.submit}
+                                onClick={() => { console.log('reset'); reset() }}
+                            >รีเซ็ตฟอร์ม</Button>
+                        </Grid>
+                        
                     </Grid>
-                </Grid>
-            </form>
-
+                </form>
+            </BlockUi>
         </>
     )
 }
 
-export default AddUserForm;
+
+function mapStateToProps(state) {
+    return {
+        userData: {
+            ...state
+        }
+    };
+}
+
+export default connect(mapStateToProps)(AddUserForm);

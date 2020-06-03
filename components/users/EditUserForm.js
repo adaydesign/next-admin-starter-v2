@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
+import { connect } from 'react-redux';
 import Link from 'next/link'
 import Router from 'next/router'
 import Select from "react-select";
-// import { Formik } from "formik";
 import { useForm, Controller } from "react-hook-form";
 
 import { Button, TextField, Divider, Grid, Typography }
@@ -15,12 +15,15 @@ import { getAllRoles } from '../../includes/requests/roles'
 import { getAllOfficerTypes } from '../../includes/requests/officertypes'
 // import { getDateYMDFormat } from '../../includes/lib/date-utils'
 
+import BlockUi from 'react-block-ui';
+
 const EditUserForm = (props) => {
-    const { onResponses,data } = props
+    const { userData, onResponses,data } = props
 
     const classes = useStyles()
-    const { register, handleSubmit, control, errors } = useForm()
+    const { handleSubmit, control, errors } = useForm()
 
+    const [showBlockUI, setShowBlockUI] = useState(true)
     // option
     var [officesOptions, setOfficesOptions] = useState([])
     var [rolesOptions, setRolesOptions] = useState([])
@@ -43,22 +46,13 @@ const EditUserForm = (props) => {
         roles: data.roles,
         status: data.status
     }
+    console.log('init values')
+    console.log(initValues)
 
     const loadOfficesData = async () => {
-        /*
-        courtCode: "0000001"
-        division:
-        id: 1
-        name: "สำนัก/สถาบัน/กอง/ศูนย์ ในส่วนกลาง"
-        slug: "central"
-        __proto__: Object
-        id: 1
-        name: "สำนักคณะกรรมการบริหารศาลยุติธรรม"
-        slug: "0000001"
-        */
         const result = await getAllOffices()
-        console.log('load office')
-        console.log(result.data.data.offices)
+        // console.log('load office')
+        // console.log(result.data.data.offices)
         if (result.data.data.offices != undefined) {
             const options = result.data.data.offices.map(o => {
                 return {
@@ -66,18 +60,13 @@ const EditUserForm = (props) => {
                     label: o.name
                 }
             })
-            console.log(options)
+            // console.log(options)
+            console.log('1. load office')
             setOfficesOptions(options)
         }
     }
 
     const loadRoleData = async () => {
-        /*
-        description: "Only for admin"
-        id: 2
-        name: "ROLE_ADMIN"
-        slug: "admin"
-        */
         const result = await getAllRoles()
         if (result.data.data.roles != undefined) {
             // console.log(result.data.data.roles)
@@ -87,7 +76,8 @@ const EditUserForm = (props) => {
                     label: o.name
                 }
             })
-            console.log(options)
+            // console.log(options)
+            console.log('2. load role type')
             setRolesOptions(options)
         }
     }
@@ -103,44 +93,52 @@ const EditUserForm = (props) => {
                 }
             })
             // console.log(options)
+            console.log('3. load officer type')
             settypeOfficerOptions(options)
         }
     }
 
+    const loadAllData = async () => {
+        await loadOfficesData()
+        await loadRoleData()
+        await loadOfficerTypeData()
+        console.log('4. off block ui')
+        setShowBlockUI(false)
+    }
+
     useEffect(() => {
-        loadOfficesData()
-        loadRoleData()
-        loadOfficerTypeData()
+        loadAllData()
     }, [])
 
     const onSubmitHandle = async (formData) => {
-
         // console.log(formData)
         var roles = []
         if (formData.role != undefined) {
             roles = [{ "id": formData.role.value }]
         }
+
         var sendData = {
             ...formData,
             officeID: formData.office.value,
             officerTypeID: formData.typeOfficer.value,
             roles: roles,
-            status: formData.status.value
+            status: formData.status.value,
+            updatedUID: userData.id
         }
 
-        console.log('submit - send data')
-        console.log(sendData)
+        // console.log('submit - send data')
+        // console.log(sendData)
         // sendData.start_date = new Date(formData.start_date).toJSON()
         // sendData.end_date = new Date(formData.end_date).toJSON()
 
-        const token = localStorage.getItem('token')
+        const token = userData.token //localStorage.getItem('token')
         if (token) {
             try {
                 const result = await editUser(token, sendData.id, sendData)
                 console.log(result)
                 onResponses(true, { message: `แก้ไขข้อมูลแล้ว` })
             } catch (err) {
-                console.log(err)
+                // console.log(err)
                 // console.log(err.response);
                 if (err.response != undefined && err.response.data != undefined) {
                     // console.log(err.response.data.message);
@@ -158,11 +156,11 @@ const EditUserForm = (props) => {
 
     return (
         <>
-            {initValues.id ? (
+            <BlockUi tag="div" blocking={showBlockUI} renderChildren={false}>
                 <form onSubmit={handleSubmit(onSubmitHandle)} className={classes.form} >
                     <Grid container direction="row" alignItems="flex-end" spacing={2}>
                         <Grid item md={2} >
-                            <Typography>รหัสบัญชี</Typography>
+                            <Typography>บัญชีผู้ใช้</Typography>
                         </Grid>
                         <Grid item md={2} >
                             <Controller as={TextField}
@@ -351,16 +349,24 @@ const EditUserForm = (props) => {
                                     variant="contained"
                                     color="secondary"
                                     className={classes.submit}
-                                >ยกเลิก</Button>
+                                >กลับไปยังรายการ</Button>
                             </Link>
                         </Grid>
                     </Grid>
                 </form>
 
-            ) : (<>{'loading..'}</>)}
+            </BlockUi>
 
         </>
     )
 }
 
-export default EditUserForm;
+function mapStateToProps(state) {
+    return {
+        userData: {
+            ...state
+        }
+    };
+}
+
+export default connect(mapStateToProps)(EditUserForm);

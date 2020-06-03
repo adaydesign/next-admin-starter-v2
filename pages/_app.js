@@ -6,6 +6,7 @@ import Head from 'next/head';
 import { ThemeProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import theme from '../themes/theme';
+import 'react-block-ui/style.css';
 
 const MyApp = (props) => {
   const { Component, pageProps, reduxStore } = props;

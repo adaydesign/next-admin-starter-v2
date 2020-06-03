@@ -14,7 +14,7 @@ import { isExpiredToken } from '../../includes/requests/jwt-utils'
 const Layout = (props) => {
     const classes = useStyles()
 
-    const { userData } = props;
+    const { userData, children } = props;
 
     // // redux dispatch
     const dispatch = useDispatch();
@@ -58,15 +58,15 @@ const Layout = (props) => {
                 // check token not expire
                 if (!isExpiredToken(tokenLocal)) {
                     // dump data to redux store
-                    console.log('user login :' + userData.loginSuccess)
+                    // console.log('user login :' + userData.loginSuccess)
                     if (!userData.loginSuccess) {
-                        console.log('dump data to redux store')
+                        // console.log('dump data to redux store')
                         dispatch(saveLoginUser(JSON.parse(userLocal), tokenLocal))
                     }
 
                     userLogin = true
                 } else {
-                    console.log('token is expired ..')
+                    // console.log('token is expired ..')
                     // clear
                     clearUserLocalData()
                     // redirect
@@ -105,7 +105,7 @@ const Layout = (props) => {
                     </>}
                 <main className={classes.content}>
                     <Toolbar />
-                    {props.children}
+                    {children}
                     <Footer />
                 </main>
             </div>

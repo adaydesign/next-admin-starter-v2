@@ -54,7 +54,7 @@ const MenuItem = (props) => {
                 </ListItem>
                 <Collapse in={open} timeout="auto" unmountOnExit>
                     <List component="div" disablePadding>
-                        {subs.map(subItem => (<MenuItem menu={subItem} fixClass={classes.nested} key={subItem.key} />))}
+                        {subs.map(subItem => !subItem.hide ? (<MenuItem menu={subItem} fixClass={classes.nested} key={subItem.key} />) : null)}
                     </List>
                 </Collapse>
             </>

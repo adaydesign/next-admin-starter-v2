@@ -8,10 +8,13 @@ import Alert from '../../components/shared/Alert'
 
 import { getAllUsers, deleteUser } from '../../includes/requests/users'
 
+import BlockUi from 'react-block-ui';
+
 const ListUsers = (props) => {
     // const classes = useStyles();
     const { userData } = props
     const [data, setData] = useState([])
+    const [showBlockUI, setShowBlockUI] = useState(true)
 
     const columns = [
         {
@@ -73,15 +76,15 @@ const ListUsers = (props) => {
                 cancelButtonText: 'ยกเลิก'
             }, (result) => {
                 if (result.value) {
-                    console.log('delete : ' + rowData.id)
+                    // console.log('delete : ' + rowData.id)
 
                     const token = userData.token
                     deleteUser(token, rowData.id).then(rs => {
                         getAllData()
                     })
-                    .catch(err => {
-                        alert(err)
-                    })
+                        .catch(err => {
+                            alert(err)
+                        })
                 }
             })
 
@@ -92,24 +95,31 @@ const ListUsers = (props) => {
             backgroundColor: '#01579b',
             color: '#FFF'
         },
+        rowStyle: (rowData, index) => {
+            if (index % 2) {
+                return { backgroundColor: "#f2f2f2" }
+            }
+        }
     }
 
 
     async function getAllData() {
         const token = userData.token
+        setShowBlockUI(true)
         try {
             const allData = await getAllUsers(token)
-            const usedData = allData.data.data.users.map(d =>{
+            const usedData = allData.data.data.users.map(d => {
                 d.name = `${d.firstName} ${d.lastName}`
                 d.office_name = d.office.name
                 d.role_name = d.roles.map(r => r.name).join(',')
                 d.status_name = d.status == 'A' ? "ปกติ" : "ยกเลิก"
                 return d
             })
-            
+
             // console.log("...List Data ")
             // console.log(usedData)
             setData(usedData)
+            setShowBlockUI(false)
         } catch (err) {
             console.log(err)
         }
@@ -121,14 +131,15 @@ const ListUsers = (props) => {
 
     return (
         <>
-            {/* {console.log(data)} */}
-            {data.length > 0 ? (<MaterialTable
-                title={"Users"}
-                data={data}
-                columns={columns}
-                actions={actions}
-                options={options}
-            />) : (<>{'loading..'}</>)}
+            <BlockUi tag="div" blocking={showBlockUI} renderChildren={false}>
+                <MaterialTable
+                    title={"Users"}
+                    data={data}
+                    columns={columns}
+                    actions={actions}
+                    options={options}
+                />
+            </BlockUi>
 
         </>
     )

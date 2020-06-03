@@ -20,13 +20,15 @@ import { postLogin } from '../../includes/requests/login';
 const LoginForm = (props) => {
     const classes = useStyles();
     // const initialValues = { username: "xxxx", password: "xx" }
-    const { register, handleSubmit, control, errors } = useForm();
+    const { handleSubmit, control, errors } = useForm();
 
-    const { onResponses } = props;
+    const { onResponses, onBeginSubmit } = props;
     // redux dispatch
     const dispatch = useDispatch();
 
     const onSubmitHandle = async (data) => {
+        onBeginSubmit(true)
+        
         try {
             const response = await postLogin(data)
             // console.log("--login finish--")
@@ -60,7 +62,7 @@ const LoginForm = (props) => {
 
         } catch (err) {
             // console.log("--error--")
-            console.log(err)
+            // console.log(err)
             // console.log(err.response);
             if (err.response != undefined && err.response.data != undefined) {
                 // console.log(err.response.data.message);
