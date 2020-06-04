@@ -55,9 +55,18 @@ const ListUsers = (props) => {
             icon: 'delete',
             tooltip: 'ลบ',
             onClick: (event, rowData) => deleteDataHandle(event, rowData)
-        }
+        },
+        {
+            icon: 'add',
+            tooltip: 'เพิ่มบัญชีผู้ใช้',
+            isFreeAction: true,
+            onClick: (event) => redirectHandle(event, '/users/add')
+          }
     ]
 
+    const redirectHandle = (event,url) => {
+        Router.push(url)
+    }
     const editDataHandle = (event, rowData) => {
         // alert("You edit " + rowData.id)
         Router.push('/users/edit/[id]', `/users/edit/${rowData.id}`)
@@ -91,6 +100,7 @@ const ListUsers = (props) => {
     }
 
     const options = {
+        actionsColumnIndex: -1,
         headerStyle: {
             backgroundColor: '#01579b',
             color: '#FFF'

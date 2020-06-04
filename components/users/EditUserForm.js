@@ -254,6 +254,7 @@ const EditUserForm = (props) => {
                             <Controller as={Select}
                                 name="typeOfficer"
                                 control={control}
+                                isClearable={true}
                                 options={typeOfficerOptions}
                                 onChange={([selected]) => {
                                     return selected
@@ -287,6 +288,7 @@ const EditUserForm = (props) => {
                             <Controller as={Select}
                                 name="office"
                                 control={control}
+                                isClearable={true}
                                 options={officesOptions}
                                 onChange={([selected]) => {
                                     return selected
@@ -304,6 +306,7 @@ const EditUserForm = (props) => {
                             <Controller as={Select}
                                 name="role"
                                 control={control}
+                                isClearable={true}
                                 options={rolesOptions}
                                 onChange={([selected]) => {
                                     return selected
@@ -322,6 +325,7 @@ const EditUserForm = (props) => {
                             <Controller as={Select}
                                 name="status"
                                 control={control}
+                                isClearable={true}
                                 options={userStatusOptions}
                                 onChange={([selected]) => {
                                     return selected

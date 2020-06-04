@@ -34,7 +34,7 @@ const AddUserForm = (props) => {
         roles: [{ id: 0 }],
         status: "A"
     }
-    const { register, handleSubmit, control, errors, reset } = useForm()
+    const { register, handleSubmit, control, errors, reset } = useForm({defaultValues: initValues})
 
     const [showBlockUI, setShowBlockUI] = useState(true)
     // option
@@ -157,7 +157,7 @@ const AddUserForm = (props) => {
                 <form onSubmit={handleSubmit(onSubmitHandle)} className={classes.form} >
                     <Grid container direction="row" alignItems="flex-end" spacing={2}>
                         <Grid item md={2} >
-                            <Typography>บัญชีผู้ใช้และรหัสผ่าน</Typography>
+                            <Typography>บัญชีและรหัสผ่าน</Typography>
                         </Grid>
                         <Grid item md={4} >
                             <Controller as={TextField}
@@ -168,7 +168,6 @@ const AddUserForm = (props) => {
                                 fullWidth
                                 label="ชื่อบัญชี"
                                 name="username"
-                                defaultValue={initValues.username}
                             />
                         </Grid>
                         <Grid item md={4} >
@@ -181,7 +180,6 @@ const AddUserForm = (props) => {
                                 label="รหัสผ่าน"
                                 name="password"
                                 type="password"
-                                defaultValue={initValues.password}
                             />
                         </Grid>
                     </Grid>
@@ -197,7 +195,6 @@ const AddUserForm = (props) => {
                                 fullWidth
                                 label="คำนำหน้า"
                                 name="title"
-                                defaultValue={initValues.title}
                             />
                         </Grid>
                         <Grid item md={4} >
@@ -209,7 +206,6 @@ const AddUserForm = (props) => {
                                 fullWidth
                                 label="ชื่อ"
                                 name="firstName"
-                                defaultValue={initValues.firstName}
                             />
                         </Grid>
                         <Grid item md={4} >
@@ -221,7 +217,6 @@ const AddUserForm = (props) => {
                                 fullWidth
                                 label="นามสกุล"
                                 name="lastName"
-                                defaultValue={initValues.lastName}
                             />
                         </Grid>
                     </Grid>
@@ -237,7 +232,6 @@ const AddUserForm = (props) => {
                                 fullWidth
                                 label="อีเมล"
                                 name="email"
-                                defaultValue={initValues.email}
                             />
                         </Grid>
                     </Grid>
@@ -249,6 +243,7 @@ const AddUserForm = (props) => {
                             <Controller as={Select}
                                 name="typeOfficer"
                                 control={control}
+                                isClearable={true}
                                 options={typeOfficerOptions}
                                 onChange={([selected]) => {
                                     return selected
@@ -269,7 +264,6 @@ const AddUserForm = (props) => {
                                 fullWidth
                                 label="ตำแหน่ง"
                                 name="position"
-                                defaultValue={initValues.position}
                             />
                         </Grid>
                     </Grid>
@@ -281,6 +275,7 @@ const AddUserForm = (props) => {
                             <Controller as={Select}
                                 name="office"
                                 control={control}
+                                isClearable={true}
                                 options={officesOptions}
                                 onChange={([selected]) => {
                                     return selected
@@ -297,6 +292,7 @@ const AddUserForm = (props) => {
                             <Controller as={Select}
                                 name="role"
                                 control={control}
+                                isClearable={true}
                                 options={rolesOptions}
                                 onChange={([selected]) => {
                                     return selected
@@ -313,6 +309,7 @@ const AddUserForm = (props) => {
                             <Controller as={Select}
                                 name="status"
                                 control={control}
+                                isClearable={true}
                                 options={userStatusOptions}
                                 onChange={([selected]) => {
                                     return selected
@@ -338,7 +335,7 @@ const AddUserForm = (props) => {
                                 variant="contained"
                                 color="secondary"
                                 className={classes.submit}
-                                onClick={() => { console.log('reset'); reset() }}
+                                onClick={() => { reset() }}
                             >รีเซ็ตฟอร์ม</Button>
                         </Grid>
                         
